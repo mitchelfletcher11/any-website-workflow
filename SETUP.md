@@ -1,21 +1,31 @@
-# Setup
+# any-website-workflow — setup
 
-`any-website-workflow` is a **composing** skill — it invokes these skills at specific phases rather
-than duplicating them. Install the ones you want active (each is optional; the workflow degrades
-gracefully, but you get the full experience with all four):
+This skill **composes five other skills**. It now installs them for you: on first run its
+**Preflight** section detects each, and on your yes clones the missing ones into `~/.claude/skills/`.
+You normally don't need to touch anything here — just install this skill and answer the prompt.
 
-| Composed skill | Used at | Purpose |
+## The composed skills (all public)
+
+| Skill | Repo | Role |
 |---|---|---|
-| `rest-website-extract` | Phase 2 | harvest a real existing site's content/assets/brand (content-agnostic) |
-| `data-search-to-saturation` | Phase 3 | discover ranked exemplar sites + current best practice |
-| `frontend-design` | Phase 5 | the build-craft principles (owns design taste; this skill's defaults defer to it) |
-| `cloudflare-pages-deploy` | Phase 7 | publish the static build to a public HTTPS URL (credentials, wrangler/Node caveat) |
+| `frontend-design` | https://github.com/mitchelfletcher11/frontend-design | Phase 5 — build craft (quality core) |
+| `cloudflare-pages-deploy` | https://github.com/mitchelfletcher11/cloudflare-pages-deploy | Phase 7 — deploy to a public HTTPS URL |
+| `data-search-to-saturation` | https://github.com/mitchelfletcher11/data-search-to-saturation | Phase 3 — exemplar discovery |
+| `rest-website-extract` | https://github.com/mitchelfletcher11/rest-website-extract | Phase 2 — extract a live site (from-existing mode) |
+| `rest-website-intake` | https://github.com/mitchelfletcher11/rest-website-intake | Phase 1 — intake when there's no site (pairs with extract) |
 
-## Tooling
-- **Node + Playwright** for Phase 2 extraction and Phase 6 verification (a project with `playwright` installed).
-- **Cloudflare account + API token** for deploy — handled by `cloudflare-pages-deploy` (see its SETUP).
+## Manual install (if you skip the Preflight prompt)
 
-## Notes
-- **Fonts self-host by default** (GDPR/Abmahnung); a CDN `<link>` is used only for an explicitly non-EU audience.
-- For a **restaurant**, use `rest-website-workflow` (managed WordPress) or `rest-minisite-workflow`
-  (Instagram bio-link mini-site) instead — this skill is for general-business static sites.
+```bash
+for s in frontend-design cloudflare-pages-deploy data-search-to-saturation rest-website-extract rest-website-intake; do
+  git clone --depth 1 https://github.com/mitchelfletcher11/$s.git ~/.claude/skills/$s
+done
+```
+
+`frontend-design` + `cloudflare-pages-deploy` are needed for every build; `rest-website-extract`/
+`-intake` only for transforming an existing site.
+
+## Credentials
+
+Only **`cloudflare-pages-deploy`** needs credentials (a Cloudflare API token + account ID) — see that
+skill's own `SETUP.md`. The other four need none.

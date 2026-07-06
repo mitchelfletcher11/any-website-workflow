@@ -40,6 +40,39 @@ design; the whole point is a site that feels genuinely, specifically designed.
 
 ---
 
+## Preflight (first-run setup) — install the skills this composes
+
+This skill **invokes four other skills** as black boxes. On a machine that has only THIS skill they
+won't be present, and the phases that call them will fail or quietly degrade. Before Phase 1, detect
+each and offer to install it — you (the agent) do the install; the user just says yes.
+
+Detect all four at once:
+```bash
+for s in frontend-design cloudflare-pages-deploy data-search-to-saturation rest-website-extract; do
+  [ -f ~/.claude/skills/$s/SKILL.md ] && echo "OK   $s" || echo "MISS $s"
+done
+```
+
+For each `MISS`, say what it's for and offer to install it; on yes, clone it (this pulls `SKILL.md`
+**and its bundled resources** — templates/references the skill needs):
+```bash
+git clone --depth 1 https://github.com/mitchelfletcher11/<skill>.git ~/.claude/skills/<skill>
+```
+
+| Skill | Repo (github.com/mitchelfletcher11/…) | Needed for | If declined |
+|---|---|---|---|
+| `frontend-design` | `/frontend-design` | Phase 5 build craft — the quality core | output degrades to generic template; strongly recommend installing |
+| `cloudflare-pages-deploy` | `/cloudflare-pages-deploy` | Phase 7 deploy | you deploy the static folder by hand |
+| `data-search-to-saturation` | `/data-search-to-saturation` | Phase 3 exemplar discovery | discovery is improvised ad-hoc |
+| `rest-website-extract` | `/rest-website-extract` | Phase 2, **from-existing-site mode only** | skip for from-scratch; pairs with `rest-website-intake` (`/rest-website-intake`) — install both for the from-existing path |
+
+`frontend-design` and `cloudflare-pages-deploy` materially affect every build — install those even for
+a quick from-scratch run. `rest-website-extract`/`-intake` are only needed to transform a live site.
+Cloning fetches read-only skill files (no executable hooks or scripts), but still say what you're doing
+and get a yes before writing into `~/.claude/skills/`.
+
+---
+
 ## Phase 1 — Intake (ask these; don't assume)
 
 Ask conversationally, grouped — not as a wall. Capture every answer; these are the inputs the
